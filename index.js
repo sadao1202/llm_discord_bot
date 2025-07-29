@@ -23,7 +23,7 @@ function loadHistory(userId, systemMessage) {
 
 function saveHistory(userId, history) {
   const filePath = path.join(memoryDir, `${userId}.json`);
-  fs.writeFileSync(filePath, JSON.stringify(history.slice(-30), null, 2));
+  fs.writeFileSync(filePath, JSON.stringify(history.slice(-20), null, 2));
 }
 
 const client = new Client({
