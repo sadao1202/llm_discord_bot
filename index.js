@@ -35,8 +35,6 @@ client.on('ready', () => {
 });
 
 client.on('messageCreate', async (message) => {
-  console.log('📩 New message:', message.content);
-  console.log('📨 Channel type:', message.channel.type);
   if (message.author.bot) return;
 
   const isDM = message.channel.type === 1; // 1 = DMChannel
