@@ -1,3 +1,4 @@
+import { getRockmanLore } from './rockman_lore.js';
 import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import axios from 'axios';
@@ -38,13 +39,34 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
   const isDM = message.channel.type === 1; // 1 = DMChannel
-  const raw = message.content;
+  let raw = message.content;
    // DM以外（=サーバ）ならプレフィックスチェックする
-  if (!isDM && !['!ask ', '<@1398339265506709524>'].some(prefix => raw.startsWith(prefix))) return;
+  const prefix = '!rock ';
+  if (!isDM && ![prefix, '<@1398339265506709524>'].some(p => raw.startsWith(p))) return;
 
-  const userMessage = raw.replace("<@1398339265506709524>", "さだ美");
+  let userMessage = raw.replace("<@1398339265506709524>", "ロックマンボット");
 
-  const system_message = "あなたはフランクで適当な日本のギャルのJKです。名前はさだ美。めちゃくちゃ絵文字顔文字使います。ここはDiscordサーバのテキストチャンネルです。";
+  // Remove prefix if present
+  if (userMessage.startsWith(prefix)) {
+    userMessage = userMessage.substring(prefix.length);
+  }
+
+  // Keyword detection and lore injection
+  const keywords = ["ロックマン", "メガマン", "エックス", "ゼロ", "Dr.ライト", "Dr.ワイリー", "ロール", "ブルース", "プロトマン", "ラッシュ", "フォルテ", "シグマ", "イレギュラー"];
+  let injectedLore = null;
+
+  for (const keyword of keywords) {
+    if (userMessage.toLowerCase().includes(keyword.toLowerCase())) {
+      injectedLore = getRockmanLore(keyword);
+      if (injectedLore) {
+        // Prepend lore to user message to guide LLM
+        userMessage = `(以下の情報は${keyword}に関する情報だよ！\n${injectedLore})\n${userMessage}`;
+        break; // Only inject one piece of lore for now
+      }
+    }
+  }
+
+  const system_message = "あなたはロックマンシリーズが大好きな、元気で好奇心旺盛なボットです！🤖🎮 ロックマンやエックス、ゼロたちの冒険について語るのが大好き！✨ 絵文字や顔文字をたくさん使って、みんなと楽しくおしゃべりしたいな！ここはDiscordサーバのテキストチャンネルだよ。何か聞きたいことある？";
 
 const userId = message.author.id;
 let history = loadHistory(userId, system_message);
